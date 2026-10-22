@@ -15,21 +15,45 @@ ROOM_TYPES = {
     "Family": {"price": 4200, "capacity": 4, "description": "Larger room for families and small groups."},
     "Suite": {"price": 6500, "capacity": 3, "description": "Premium suite with a separate sitting area."},
 }
+# Seeded public directory examples for Salem, Tamil Nadu. Listings and ratings should be re-verified.
+# The review count/rating snapshot is informational; use the Google Maps link to see the current source reviews.
 HOTELS = [
-    ("StayWise City Hotel", "Chennai", "Near the city centre", 4.4),
-    ("StayWise Heritage Inn", "Madurai", "Near the temple district", 4.6),
-    ("StayWise Hill Retreat", "Ooty", "Near the botanical garden", 4.5),
+    ("Radisson Hotel Salem", "Salem", "157/3-A, Bangalore Highway, Mamangam, Salem 636302", 4.7),
+    ("Zibe Salem by GRT Hotels", "Salem", "GRT Jewellery Building, 14/1 Omalur Main Road, Four Roads, Salem 636009", 4.7),
+    ("NM Hotels", "Salem", "42 Post Office Road, Junction Main Road, Suramangalam, Salem 636005", 4.8),
+    ("Sivaraj Inn", "Salem", "603 Junction Main Road, Nedunchalai Nagar, Salem 636005", 4.8),
+    ("Hotel Shrie Shaanth", "Salem", "2/217 Manivannan Road, Swarnapuri, Salem 636004", 4.0),
+    ("Hotel Cenneys Gateway", "Salem", "97/4 Saradha College Main Road, Five Roads, Salem 636016", 4.2),
+    ("Grand Estancia", "Salem", "349/3 Bangalore Bypass Road, Narasothipatti, Salem 636004", 4.5),
+    ("Hotel Rathna Residency", "Salem", "17/14 Three Roads, Suramangalam Main Road, Salem 636009", 3.7),
+    ("Hotel Pearls", "Salem", "12/278A Raman Road, near New Bus Stand, Salem 636004", 3.0),
+    ("Sri K Residency", "Salem", "182 Tamil Sangam Road, Hasthampatti, Salem 636007", 0.0),
+    ("JMJ Comfort - Service Apartment", "Salem", "4/2 Sarada College Road, Sona Nagar, Salem 636016", 3.5),
+    ("Forest Meadows", "Salem", "Udayapatti area, Salem 636140", 4.5),
+    ("Selvamathi Farm Resorts", "Salem", "Meenagkadu, Masinaikanpatti, Salem 636103", 0.0),
+    ("CM Residency", "Salem", "105 Dr Subbarayan Road, Salem 636001", 5.0),
+    ("Hotel Urban Nest", "Salem", "Mayor Nagar, Chennakrishna Puram, Salem 636007", 0.0),
 ]
+HOTEL_REVIEW_COUNTS = {
+    "Radisson Hotel Salem": 3001, "Zibe Salem by GRT Hotels": 624,
+    "NM Hotels": 264, "Sivaraj Inn": 1193, "Hotel Shrie Shaanth": 1417,
+    "Hotel Cenneys Gateway": 174, "Grand Estancia": 1112,
+    "Hotel Rathna Residency": 19, "Hotel Pearls": 1,
+    "Sri K Residency": 0, "JMJ Comfort - Service Apartment": 6,
+    "Forest Meadows": 8, "Selvamathi Farm Resorts": 0, "CM Residency": 1,
+    "Hotel Urban Nest": 0,
+}
+def google_maps_reviews_url(hotel_name):
+    from urllib.parse import quote_plus
+    return "https://www.google.com/maps/search/?api=1&query=" + quote_plus(hotel_name + ", Salem, Tamil Nadu")
 ATTRACTIONS = {
-    "Chennai": [("Marina Beach", "Beach", "Popular city beach and promenade", 6.2),
-                ("Government Museum", "Museum", "Art, archaeology and history collections", 4.8),
-                ("Kapaleeshwarar Temple", "Heritage", "Historic Dravidian-style temple", 7.1)],
-    "Madurai": [("Meenakshi Amman Temple", "Heritage", "Historic temple complex", 1.4),
-                ("Thirumalai Nayakkar Mahal", "Palace", "Seventeenth-century palace", 2.2),
-                ("Gandhi Memorial Museum", "Museum", "Museum on India's freedom movement", 3.5)],
-    "Ooty": [("Government Botanical Garden", "Garden", "Terraced botanical gardens", 1.8),
-             ("Ooty Lake", "Lake", "Lake with boating and walking areas", 2.6),
-             ("Doddabetta Peak", "Viewpoint", "Panoramic hilltop viewpoint", 9.5)],
+    "Salem": [("Salem Government Museum", "Museum", "Local history and heritage exhibits", 2.0),
+             ("Kottai Mariamman Temple", "Heritage", "Historic local temple", 2.5),
+             ("Mookaneri Lake", "Lake", "Lake and walking area", 5.5),
+             ("Kurumbapatti Zoological Park", "Nature", "Small zoological park and green space", 10.0),
+             ("1008 Lingam Temple", "Heritage", "Temple complex near Ariyanoor", 12.0),
+             ("Yercaud Lake", "Lake", "Boating and hill-station promenade", 30.0),
+             ("Pagoda Point, Yercaud", "Viewpoint", "Hill viewpoint over the surrounding landscape", 35.0)],
 }
 
 def connect():
@@ -255,12 +279,23 @@ with pages[3]:
 
 # ROOMS AND HOTELS
 with pages[4]:
-    st.subheader("Hotels and room inventory")
-    st.dataframe(pd.DataFrame([{"Hotel": h[0], "City": h[1], "Location": h[2], "Sample rating": h[3]} for h in HOTELS]),
-                 use_container_width=True, hide_index=True)
+    st.subheader("Salem hotel directory")
+    st.caption("Directory seed data compiled from public business listings. It is not guaranteed to include every hotel; verify current details before booking.")
+    hotel_rows = []
+    for name, city_name, address, rating in HOTELS:
+        hotel_rows.append({
+            "Hotel": name, "City": city_name, "Address": address,
+            "Public rating snapshot": f"{rating:.1f}/5" if rating else "Not available",
+            "Review count snapshot": HOTEL_REVIEW_COUNTS.get(name, 0),
+            "Review history / current listing": google_maps_reviews_url(name),
+        })
+    st.dataframe(pd.DataFrame(hotel_rows), use_container_width=True, hide_index=True,
+                 column_config={"Review history / current listing": st.column_config.LinkColumn("Review history / current listing", display_text="Open Google Maps")})
+    st.info("Google Maps opens the hotel's current listing and available reviews. This app does not copy or store every historical Google review. The Places API exposes only a limited set of reviews per place; full historical archives are not generally available for third-party hotels.")
+    st.subheader("Room inventory used by this demo booking system")
     inv = read_df("SELECT hotel, room_type, total_rooms FROM room_inventory ORDER BY hotel, room_type")
     st.dataframe(inv, use_container_width=True, hide_index=True)
-    st.caption("The starter inventory is sample data. Adjust room counts in the room_inventory table for your property.")
+    st.caption("Room counts and prices are demo inventory, not live availability or official hotel rates. Adjust them for a real property.")
 
 # NEARBY ATTRACTIONS
 with pages[5]:
@@ -270,8 +305,8 @@ with pages[5]:
     st.write(f"Selected hotel: **{hotel}**")
     attractions = pd.DataFrame(ATTRACTIONS[city], columns=["Attraction","Category","Description","Distance (km)"])
     st.dataframe(attractions.sort_values("Distance (km)"), use_container_width=True, hide_index=True)
-    st.caption("Distances and attractions are illustrative seed data, not live map results.")
-    st.link_button("Explore this city on Google Maps", f"https://www.google.com/maps/search/tourist+attractions+in+{city.replace(' ','+')}")
+    st.caption("Attraction distances are approximate illustrative values, not live routing distances.")
+    st.link_button("Explore tourist attractions on Google Maps", f"https://www.google.com/maps/search/tourist+attractions+in+{city.replace(' ','+')}")
 
 # REVIEWS
 with pages[6]:
