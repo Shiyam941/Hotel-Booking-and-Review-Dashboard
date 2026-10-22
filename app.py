@@ -335,8 +335,25 @@ with pages[4]:
             "Review count snapshot": HOTEL_REVIEW_COUNTS.get(name, 0),
             "Review history / current listing": google_maps_reviews_url(name),
         })
-    st.dataframe(pd.DataFrame(hotel_rows), use_container_width=True, hide_index=True,
-                 column_config={"Review history / current listing": st.column_config.LinkColumn("Review history / current listing", display_text="Open Google Maps")})
+    st.markdown('<div class="sw-section-note">Explore the directory, compare public rating snapshots, and open the current listing for photos and guest reviews.</div>', unsafe_allow_html=True)
+    hotel_cols = st.columns(3, gap="medium")
+    for idx, row in enumerate(hotel_rows):
+        with hotel_cols[idx % 3]:
+            rating_label = row["Public rating snapshot"]
+            count_label = f'{row["Review count snapshot"]:,} public reviews' if row["Review count snapshot"] else "Review count unavailable"
+            maps_url = row["Review history / current listing"]
+            st.markdown(f"""
+            <div style="height:225px;display:flex;flex-direction:column;background:#fff;border:1px solid #e5eaf4;border-radius:18px;padding:19px;margin-bottom:14px;box-shadow:0 7px 22px rgba(30,50,100,.045);">
+              <div style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#6678ba;font-weight:800;">SALEM · HOTEL DIRECTORY</div>
+              <div style="font-family:Manrope,sans-serif;font-size:1.08rem;font-weight:800;line-height:1.3;color:#172033;margin-top:9px;">{row["Hotel"]}</div>
+              <div style="font-size:.84rem;color:#64748b;line-height:1.45;margin-top:7px;flex-grow:1;">{row["Address"]}</div>
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:13px;">
+                <span style="font-size:.9rem;font-weight:800;color:#243f9f;">★ {rating_label}</span>
+                <span style="font-size:.76rem;color:#64748b;">{count_label}</span>
+              </div>
+              <a href="{maps_url}" target="_blank" style="display:block;text-align:center;margin-top:13px;text-decoration:none;color:#fff;background:#3157d5;padding:10px;border-radius:10px;font-size:.84rem;font-weight:700;">View photos & reviews ↗</a>
+            </div>
+            """, unsafe_allow_html=True)
     st.info("Google Maps opens the hotel's current listing and available reviews. This app does not copy or store every historical Google review. The Places API exposes only a limited set of reviews per place; full historical archives are not generally available for third-party hotels.")
     st.subheader("Room inventory used by this demo booking system")
     inv = read_df("SELECT hotel, room_type, total_rooms FROM room_inventory ORDER BY hotel, room_type")
