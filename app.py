@@ -9,6 +9,42 @@ import streamlit as st
 DB_PATH = Path(__file__).with_name("hotel_manager.db")
 st.set_page_config(page_title="StayWise | Hotel Management", page_icon="🏨", layout="wide")
 
+# Global UI polish
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+:root { --sw-ink:#172033; --sw-muted:#64748b; --sw-blue:#3157d5; --sw-pale:#f3f6ff; }
+html, body, [class*="css"] { font-family:'DM Sans',sans-serif; }
+.stApp { background:linear-gradient(180deg,#f7f9ff 0%,#ffffff 36%,#f8fafc 100%); color:var(--sw-ink); }
+.block-container { max-width:1440px; padding-top:1.6rem; padding-bottom:3rem; }
+h1,h2,h3 { font-family:'Manrope',sans-serif !important; letter-spacing:-.035em; color:#172033; }
+h2 { font-size:1.45rem !important; margin-top:1.1rem !important; }
+[data-testid="stHeader"] { background:rgba(255,255,255,.8); }
+[data-testid="stTabs"] [data-baseweb="tab-list"] { gap:7px; padding:9px; background:#eef2ff; border-radius:16px; }
+[data-testid="stTabs"] button[data-baseweb="tab"] { border-radius:11px; padding:10px 14px; font-weight:600; color:#536078; border:1px solid transparent; }
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] { background:#fff; color:#294bc1; box-shadow:0 3px 12px rgba(32,52,110,.09); }
+[data-testid="stMetric"] { background:#fff; border:1px solid #e7ebf4; border-radius:18px; padding:18px 18px 14px; box-shadow:0 6px 20px rgba(30,50,100,.045); }
+[data-testid="stMetricLabel"] { color:#65718a; font-weight:600; }
+[data-testid="stMetricValue"] { color:#18233a; font-family:'Manrope',sans-serif; font-weight:800; }
+[data-testid="stForm"], [data-testid="stDataFrame"], [data-testid="stPlotlyChart"], [data-testid="stAlert"] { border-radius:16px; }
+[data-testid="stForm"] { background:#fff; border:1px solid #e5eaf4; padding:20px; }
+.stButton button, .stFormSubmitButton button, .stDownloadButton button, .stLinkButton a { border-radius:11px; font-weight:700; min-height:2.7rem; transition:all .18s ease; }
+.stButton button[kind="primary"], .stFormSubmitButton button[kind="primary"] { background:linear-gradient(135deg,#365be0,#2444b8); border:0; box-shadow:0 6px 14px rgba(49,87,213,.2); }
+.stButton button:hover, .stFormSubmitButton button:hover, .stDownloadButton button:hover { transform:translateY(-1px); }
+input, textarea, [data-baseweb="select"] > div { border-radius:10px !important; }
+[data-testid="stDataFrame"] { border:1px solid #e7ebf4; overflow:hidden; }
+hr { border-color:#e7ebf4; }
+.sw-hero { position:relative; overflow:hidden; padding:30px 32px; margin:0 0 22px; border-radius:24px; color:#fff; background:radial-gradient(circle at 90% 15%,rgba(132,164,255,.65),transparent 30%),linear-gradient(120deg,#172b65 0%,#3157d5 58%,#6485ee 100%); box-shadow:0 18px 40px rgba(37,67,163,.18); }
+.sw-eyebrow { display:inline-block; padding:6px 10px; border:1px solid rgba(255,255,255,.3); border-radius:999px; background:rgba(255,255,255,.12); font-size:.76rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.sw-hero h1 { color:#fff !important; font-size:clamp(2rem,4vw,3.1rem) !important; margin:.7rem 0 .4rem !important; line-height:1.08; }
+.sw-hero p { color:rgba(255,255,255,.82); font-size:1.02rem; max-width:720px; margin:0; line-height:1.65; }
+.sw-hero-foot { display:flex; gap:9px; flex-wrap:wrap; margin-top:18px; }
+.sw-chip { display:inline-block; color:#fff; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2); padding:7px 11px; border-radius:10px; font-size:.82rem; font-weight:600; }
+.sw-section-note { color:#64748b; font-size:.92rem; margin-top:-.3rem; margin-bottom:1rem; }
+@media (max-width: 700px) { .block-container { padding:1rem .8rem 2rem; } .sw-hero { padding:23px 20px; border-radius:18px; } [data-testid="stTabs"] [data-baseweb="tab-list"] { gap:3px; } [data-testid="stTabs"] button[data-baseweb="tab"] { padding:8px 10px; } }
+</style>
+""", unsafe_allow_html=True)
+
 ROOM_TYPES = {
     "Standard": {"price": 1800, "capacity": 2, "description": "Comfortable room for solo travellers and couples."},
     "Deluxe": {"price": 2800, "capacity": 2, "description": "Spacious room with upgraded amenities."},
@@ -128,11 +164,21 @@ def money(value):
     return f"₹{float(value):,.0f}"
 
 init_db()
-st.title("StayWise")
-st.caption("Hotel booking, front-desk operations, guest reviews and business analytics")
+st.markdown("""
+<div class="sw-hero">
+  <span class="sw-eyebrow">STAYWISE · HOTEL OPERATIONS</span>
+  <h1>Your stay, beautifully managed.</h1>
+  <p>A modern workspace for reservations, front-desk operations, Salem hotel discovery, guest feedback and clear business insights.</p>
+  <div class="sw-hero-foot">
+    <span class="sw-chip">✦ Smart reservations</span>
+    <span class="sw-chip">⌂ Front-desk workspace</span>
+    <span class="sw-chip">↗ Live dashboard from your demo data</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 pages = st.tabs([
-    "Overview", "Find & Book", "Bookings", "Check-in / Check-out",
-    "Rooms & Hotels", "Nearby Attractions", "Guest Reviews", "Analytics"
+    "◈ Overview", "⌕ Find & Book", "▤ Bookings", "✓ Check-in / Check-out",
+    "⌂ Rooms & Hotels", "⌖ Nearby Attractions", "☆ Guest Reviews", "▥ Analytics"
 ])
 
 # OVERVIEW
